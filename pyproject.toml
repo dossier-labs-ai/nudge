@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "nudge-policy"
+version = "0.1.0"
+description = "Interpretable contextual-bandit learning from questions and action feedback"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["numpy>=1.26,<3"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.scripts]
+nudge-benchmark = "nudge.benchmark:main"
+
+[project.optional-dependencies]
+operations = ["matplotlib>=3.9,<4"]
+routerbench = [
+    "pandas>=2.2,<3",
+]
+
+[dependency-groups]
+dev = ["ruff>=0.11,<1", "matplotlib>=3.9,<4"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/nudge"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/src", "/tests", "/examples", "/gateway", "/ops", "/docs", "/README.md", "/CONTRIBUTING.md", "/LICENSE", "/pyproject.toml"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

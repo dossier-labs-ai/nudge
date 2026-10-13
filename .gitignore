@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+dist/
+*.db
+*.db-wal
+*.db-shm
+benchmark-results/
+.firebase/
+firebase-debug.log
