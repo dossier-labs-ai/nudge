@@ -1,0 +1,192 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "annotations"
+  ],
+  "properties": {
+    "annotations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "task_type",
+          "subject",
+          "knowledge_depth",
+          "reasoning_steps",
+          "abstraction",
+          "has_answer_options",
+          "option_difficulty",
+          "quantitative_operation",
+          "code_structure",
+          "algorithmic_requirement",
+          "constraint_load",
+          "edge_case_sensitivity",
+          "information_integration",
+          "reference_tracking",
+          "causal_physical_model",
+          "temporal_order",
+          "precision_requirement"
+        ],
+        "properties": {
+          "task_type": {
+            "type": "string",
+            "enum": [
+              "code_generation",
+              "quantitative_problem",
+              "knowledge_question",
+              "conceptual_reasoning",
+              "reference_resolution",
+              "event_continuation",
+              "procedural_reasoning"
+            ]
+          },
+          "subject": {
+            "type": "string",
+            "enum": [
+              "everyday_life",
+              "mathematics",
+              "computer_science",
+              "biology_medicine",
+              "physics_engineering",
+              "chemistry",
+              "earth_space",
+              "economics_business",
+              "law_government",
+              "history_culture_religion",
+              "psychology_social",
+              "language_logic"
+            ]
+          },
+          "knowledge_depth": {
+            "type": "string",
+            "enum": [
+              "everyday",
+              "school",
+              "specialist"
+            ]
+          },
+          "reasoning_steps": {
+            "type": "string",
+            "enum": [
+              "zero",
+              "one",
+              "two",
+              "three_plus"
+            ]
+          },
+          "abstraction": {
+            "type": "string",
+            "enum": [
+              "concrete",
+              "symbolic",
+              "abstract_principle"
+            ]
+          },
+          "has_answer_options": {
+            "type": "string",
+            "enum": [
+              "no",
+              "yes"
+            ]
+          },
+          "option_difficulty": {
+            "type": "string",
+            "enum": [
+              "not_applicable",
+              "obvious",
+              "conceptual",
+              "subtle"
+            ]
+          },
+          "quantitative_operation": {
+            "type": "string",
+            "enum": [
+              "none",
+              "basic_arithmetic",
+              "multiplicative",
+              "proportional",
+              "formal_math"
+            ]
+          },
+          "code_structure": {
+            "type": "string",
+            "enum": [
+              "not_code",
+              "scalar_numeric",
+              "string",
+              "sequence",
+              "mapping_set",
+              "matrix_graph_tree"
+            ]
+          },
+          "algorithmic_requirement": {
+            "type": "string",
+            "enum": [
+              "not_code",
+              "direct_library",
+              "iteration",
+              "ordering_search",
+              "recursive_combinatorial",
+              "formula"
+            ]
+          },
+          "constraint_load": {
+            "type": "string",
+            "enum": [
+              "one",
+              "two",
+              "three_plus"
+            ]
+          },
+          "edge_case_sensitivity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "moderate",
+              "high"
+            ]
+          },
+          "information_integration": {
+            "type": "string",
+            "enum": [
+              "single_fact",
+              "multiple_facts"
+            ]
+          },
+          "reference_tracking": {
+            "type": "string",
+            "enum": [
+              "not_required",
+              "required"
+            ]
+          },
+          "causal_physical_model": {
+            "type": "string",
+            "enum": [
+              "not_required",
+              "required"
+            ]
+          },
+          "temporal_order": {
+            "type": "string",
+            "enum": [
+              "not_required",
+              "required"
+            ]
+          },
+          "precision_requirement": {
+            "type": "string",
+            "enum": [
+              "plausibility",
+              "exact_concept",
+              "exact_number",
+              "executable_code"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
