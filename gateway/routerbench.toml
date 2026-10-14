@@ -1,0 +1,37 @@
+# Local benchmark gateway only. Rune's native bridge is a provider transport.
+[gateway.observability]
+enabled = false
+
+[models.rune_native]
+routing = ["native_bridge"]
+[models.rune_native.providers.native_bridge]
+type = "openai"
+model_name = "rune"
+api_base = "http://host.docker.internal:3119/v1"
+api_key_location = "dynamic::rune_api_key"
+
+[models."glm-5.2-full"]
+routing = ["baseten"]
+[models."glm-5.2-full".providers.baseten]
+type = "openai"
+model_name = "zai-org/GLM-5.2"
+api_base = "https://inference.baseten.co/v1"
+api_key_location = "dynamic::baseten_api_key"
+
+[functions.nudge_rune]
+type = "json"
+[functions.nudge_rune.variants.native]
+type = "chat_completion"
+model = "rune_native"
+json_mode = "off"
+
+[functions.nudge_propose]
+type = "json"
+output_schema = "schemas/proposals.json"
+[functions.nudge_propose.variants.glm_thinking]
+type = "chat_completion"
+model = "glm-5.2-full"
+json_mode = "strict"
+max_tokens = 16384
+temperature = 0.1
+extra_body = [{ pointer = "/chat_template_kwargs", value = { thinking = true } }]
