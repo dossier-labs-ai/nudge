@@ -1,0 +1,12 @@
+# Merge into your development gateway config after selecting an existing model.
+# No credentials, service URLs, or production model routes are included.
+[functions.nudge_propose]
+type = "json"
+output_schema = "schemas/proposals.json"
+
+[functions.nudge_propose.variants.chat]
+type = "chat_completion"
+model = "replace-with-your-configured-chat-model"
+json_mode = "strict"
+max_tokens = 4096
+temperature = 0.1

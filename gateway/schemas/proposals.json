@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["proposals"],
+  "properties": {
+    "proposals": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["operation", "target", "question", "questions"],
+        "properties": {
+          "operation": {"type": "string", "enum": ["add", "revise", "drop", "add_bundle"]},
+          "questions": {
+            "anyOf": [
+              {"type": "null"},
+              {"type": "array", "minItems": 2, "maxItems": 16,
+               "items": {"$ref": "#/properties/proposals/items/properties/question/anyOf/1"}}
+            ]
+          },
+          "target": {"type": ["string", "null"]},
+          "question": {
+            "anyOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "prompt", "kind", "paraphrase", "levels", "categories"],
+                "properties": {
+                  "name": {"type": "string"},
+                  "prompt": {"type": "string"},
+                  "kind": {"type": "string", "enum": ["binary", "ordinal", "categorical"]},
+                  "paraphrase": {"type": "string"},
+                  "levels": {
+                    "anyOf": [
+                      {"type": "null"},
+                      {"type": "array", "minItems": 5, "maxItems": 5, "items": {"type": "string"}}
+                    ]
+                  },
+                  "categories": {
+                    "anyOf": [
+                      {"type": "null"},
+                      {"type": "array", "minItems": 2, "maxItems": 32, "items": {"type": "string"}}
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
