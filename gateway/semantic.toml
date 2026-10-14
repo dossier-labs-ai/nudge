@@ -1,0 +1,22 @@
+# Isolated semantic-label experiment; no Rune or customer runtime dependencies.
+[gateway.observability]
+enabled = false
+
+[models."glm-5.2-full"]
+routing = ["baseten"]
+[models."glm-5.2-full".providers.baseten]
+type = "openai"
+model_name = "zai-org/GLM-5.2"
+api_base = "https://inference.baseten.co/v1"
+api_key_location = "dynamic::baseten_api_key"
+
+[functions.nudge_semantic_labels]
+type = "json"
+output_schema = "schemas/semantic.json"
+[functions.nudge_semantic_labels.variants.glm_thinking]
+type = "chat_completion"
+model = "glm-5.2-full"
+json_mode = "strict"
+max_tokens = 16384
+temperature = 0.1
+extra_body = [{ pointer = "/chat_template_kwargs", value = { thinking = true } }]
