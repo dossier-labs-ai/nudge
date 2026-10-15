@@ -7,11 +7,10 @@ Nudge learns action utilities from feedback and readable questions about the
 state. It is an experimental contextual-bandit library: no model
 fine-tuning, one SQLite file, and an explicit `learn()` call to activate updates.
 
-Requires Python 3.11+. Install this directory with `uv sync` or
-`pip install .`. The distribution is `nudge-policy`; the import is `nudge`.
+Requires Python 3.11+. Install with `pip install nudge-policy`, or clone and
+run `uv sync`. The distribution is `nudge-policy`; the import is `nudge`.
 The PyPI name `nudge` is held by an unrelated, inactive project (Evite, last
-released 2012); a PEP 541 transfer request is the path to it. Until this is
-published, install from source.
+released 2012); a PEP 541 transfer request is the path to it.
 
 ```python
 from nudge import Answer, Choice, Nudge
