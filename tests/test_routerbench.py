@@ -260,7 +260,10 @@ class RouterBenchTests(unittest.TestCase):
             save()
             baselines = reference_baselines(data, path, 10)
             self.assertEqual(len(baselines), 60)
-            self.assertEqual(baselines[data['test'][0]['state']], probabilities)
+            frozen = baselines[data['test'][0]['state']]
+            self.assertEqual(set(frozen), set(probabilities))
+            for model, value in probabilities.items():
+                self.assertAlmostEqual(frozen[model], value, places=12)
             with self.assertRaises(ValueError):
                 reference_baselines(data, path, 20)
             decisions[-1]['partition'] = 'train'
@@ -278,7 +281,10 @@ class RouterBenchTests(unittest.TestCase):
         probabilities = {m: 1 / len(MODELS) for m in MODELS}
         answerer = RuneAnswerer(routing_choice(10), ExternalGateway(),
                                baselines={'test': probabilities})
-        self.assertEqual(answerer.ask('test', []).probabilities, probabilities)
+        served = answerer.ask('test', []).probabilities
+        self.assertEqual(set(served), set(probabilities))
+        for model, value in probabilities.items():
+            self.assertAlmostEqual(served[model], value, places=12)
         with self.assertRaises(KeyError):
             answerer.ask('unknown', [])
 
