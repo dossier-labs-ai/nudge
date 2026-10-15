@@ -87,7 +87,7 @@ footer .sp{flex:1}
 <div class="hero">
 <h1>Your System One model makes a call. You say how it went. It picks better.</h1>
 <p class="lede">Nudge is a small Python library that sits on top of a System One model like <a href="https://docs.typesafe.ai">Jev</a> or <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>. Tell Nudge how a decision turned out — ticket resolved, sale closed, money saved — and it shifts future picks toward what worked. No fine-tuning. No training run. No GPUs. One file on disk.</p>
-<div class="install"><span><span class="p">$ </span>uv sync &amp;&amp; uv run python examples/support.py --store support.db</span><button id="cp">Copy</button></div>
+<div class="install"><span><span class="p">$ </span>pip install git+https://github.com/dossier-labs-ai/nudge</span><button id="cp">Copy</button></div>
 <div class="facts">
 <span><b>Day one,</b> it leans on your System One model and explores.</span>
 <span><b>Every pick is logged</b> with the odds your model gave and the odds Nudge used.</span>
@@ -181,7 +181,7 @@ asked = [Question(<span class="s">&quot;repeat_issue&quot;</span>, <span class="
     policy.feedback(d.id, resolved=<span class="o">1</span>)   <span class="c"># whenever you find out</span>
     policy.learn()                      <span class="c"># whenever you want</span></pre>
 <p>That's the whole integration. No SDK, no wrapper framework — if your thing has an <code>ask()</code> that returns odds, Nudge will use it. The question at the bottom is one you wrote. To let Nudge write its own, pass a <code>proposer=</code> backed by a chat model (see <code>docs/adapters.md</code>); without one it learns from the baseline odds and your questions only.</p>
-<p class="mut">Python 3.11+, NumPy, that's it. Nothing to deploy — Nudge runs inside your process and keeps what it learns in a SQLite file you own. Not on PyPI yet, so install the checkout with <code>uv sync</code> or <code>pip install .</code>. The package is <code>nudge-policy</code>; you still <code>import nudge</code>.</p>
+<p class="mut">Python 3.11+, NumPy, that's it. Nothing to deploy — Nudge runs inside your process and keeps what it learns in a SQLite file you own. Not on PyPI yet, so install straight from <a href="https://github.com/dossier-labs-ai/nudge">GitHub</a> with <code>pip install git+https://github.com/dossier-labs-ai/nudge</code>. The package is <code>nudge-policy</code>; you still <code>import nudge</code>. For an offline demo with no model at all, clone the repo and run <code>uv run python examples/support.py --store support.db</code>.</p>
 </section>
 
 <section class="s" id="how">
@@ -255,7 +255,7 @@ reward={<span class="s">"resolved"</span>: <span class="o">1.0</span>, <span cla
 
 <script>
 document.getElementById('cp').onclick = function () {
-  var t = 'uv sync && uv run python examples/support.py --store support.db';
+  var t = 'pip install git+https://github.com/dossier-labs-ai/nudge';
   if (navigator.clipboard) { navigator.clipboard.writeText(t); this.textContent = 'Copied'; }
 };
 </script>
