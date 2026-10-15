@@ -1,0 +1,11 @@
+{
+  "prompts": 5000,
+  "averaging": "all prompts processed so far",
+  "nudge": 0.6671034989734627,
+  "rune": 0.5809910636182534,
+  "relative_gain": 0.14821645417216,
+  "penalty_per_usd": 10,
+  "source_exported_at": "2026-10-15T06:11:15.938558+00:00",
+  "metric": "Expected answer quality minus cost penalty; scored before feedback",
+  "limitations": "One seed. Routing overhead excluded. Fixed prefix of the original 10k protocol."
+}

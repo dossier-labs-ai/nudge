@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nudge — tell your System One model what worked, it picks better</title>
+<meta name="description" content="Nudge sits on top of a System One model such as Jev or Rune. Tell it how a decision turned out and future picks shift toward what worked. No fine-tuning, no GPUs, one file on disk.">
+<meta name="robots" content="noindex">
+<style>
+:root{--ink:#37352f;--ink2:#787774;--ink3:#9b9a97;--line:rgba(55,53,47,.09);--line2:rgba(55,53,47,.16);--hov:rgba(55,53,47,.06);--soft:#f7f6f3;--warn:#fbf3db;--win:#15755e;--bg:#fff;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;--mono:"SFMono-Regular",ui-monospace,Menlo,Consolas,monospace}
+@media (prefers-color-scheme:dark){:root{--ink:#e9e7e3;--ink2:#a5a29c;--ink3:#7d7a74;--line:rgba(255,255,255,.10);--line2:rgba(255,255,255,.20);--hov:rgba(255,255,255,.06);--soft:#1b1a18;--warn:#2b2516;--win:#4fb496;--bg:#141312}}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{font-family:var(--sans);color:var(--ink);background:var(--bg);font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line2)}
+a:hover{background:var(--hov)}
+p{text-wrap:pretty}
+code,pre{font-family:var(--mono);font-size:13.5px}
+p code,li code{background:rgba(135,131,120,.18);padding:1px 5px;border-radius:3px;font-size:85%}
+pre{background:var(--soft);border-radius:6px;padding:18px 20px;overflow-x:auto;line-height:1.65;color:var(--ink);margin:18px 0}
+pre .c{color:var(--ink3)}pre .k{color:#7a5b28}pre .s{color:#2b593f}pre .o{color:var(--ink2)}
+@media (prefers-color-scheme:dark){pre .k{color:#d4a95f}pre .s{color:#8ec49f}}
+.nav{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav .in{max-width:760px;margin:0 auto;padding:0 24px;height:56px;display:flex;align-items:center;gap:12px}
+.mark{display:flex;align-items:center;gap:8px;font-weight:600;font-size:16px;border:0}.mark:hover{background:none}
+.mark .sq{width:22px;height:22px;border-radius:5px;background:var(--ink);color:var(--bg);font-size:12px;font-weight:600;display:grid;place-items:center}
+.tag{font-size:12px;padding:1px 8px;border-radius:4px;background:rgba(135,131,120,.18);color:var(--ink2);font-weight:500}
+.nav .links{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.nav .links a{border:0;color:var(--ink2);font-size:14px;padding:4px 8px;border-radius:5px}
+.wrap{max-width:760px;margin:0 auto;padding:0 24px}
+.hero{padding:84px 0 36px}
+.hero h1{font-size:44px;line-height:1.1;font-weight:700;letter-spacing:-.024em;text-wrap:balance}
+.hero .lede{font-size:20px;color:var(--ink2);margin-top:20px}
+.hero .install{display:inline-flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13.5px;background:var(--soft);border-radius:6px;padding:8px 8px 8px 14px;margin-top:28px}
+.hero .install .p{color:var(--ink3)}
+.hero .install button{font:inherit;font-family:var(--sans);font-size:12px;border:0;background:var(--bg);border-radius:4px;padding:3px 8px;color:var(--ink2);cursor:pointer;box-shadow:0 0 0 1px var(--line2)}
+.facts{display:flex;gap:26px;margin-top:30px;flex-wrap:wrap;color:var(--ink2);font-size:15px}
+.facts span{display:flex;gap:8px;align-items:baseline}.facts b{color:var(--ink);font-weight:600}
+section.s{padding:46px 0;border-top:1px solid var(--line)}
+.s h2{font-size:27px;line-height:1.22;font-weight:650;letter-spacing:-.018em;margin-bottom:14px;text-wrap:balance}
+.s h3{font-size:17px;font-weight:600;margin:28px 0 8px}
+.s p{margin-bottom:14px}
+.mut{color:var(--ink2)}
+.note{display:flex;gap:10px;padding:14px 16px;border-radius:6px;background:var(--soft);font-size:15px;margin:18px 0}
+.note.warn{background:var(--warn)}
+.note .ic{flex:none;color:var(--ink2);font-weight:600}
+.kpi{display:flex;gap:34px;flex-wrap:wrap;margin:22px 0 4px}
+.kpi b{display:block;font-size:30px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi span{font-size:13.5px;color:var(--ink2)}
+.kpi .win b{color:var(--win)}
+figure{margin:22px 0}
+figure img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+figcaption{font-size:13.5px;color:var(--ink3);margin-top:10px;line-height:1.55}
+figcaption a{color:var(--ink2)}
+ol.steps{list-style:none;counter-reset:l;margin:18px 0}
+ol.steps li{counter-increment:l;position:relative;padding:10px 0 10px 40px;font-size:16.5px}
+ol.steps li::before{content:counter(l);position:absolute;left:0;top:15px;font-family:var(--mono);font-size:12px;color:var(--ink3)}
+ul.plain{list-style:none;margin:14px 0}
+ul.plain li{padding:9px 0 9px 18px;font-size:16px;position:relative;border-bottom:1px solid var(--line)}
+ul.plain li:before{content:"";position:absolute;left:2px;top:19px;width:5px;height:5px;border-radius:50%;background:var(--ink3)}
+ul.plain li:last-child{border-bottom:0}
+.faq details{border-bottom:1px solid var(--line)}
+.faq details:first-of-type{border-top:1px solid var(--line)}
+.faq summary{list-style:none;cursor:pointer;padding:15px 0;font-weight:500;font-size:16.5px;display:flex;justify-content:space-between;gap:16px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";color:var(--ink3);font-weight:400}
+.faq details[open] summary::after{content:"\2013"}
+.faq details p{padding:0 0 16px;color:var(--ink2);font-size:16px}
+footer{border-top:1px solid var(--line);padding:28px 0 48px;color:var(--ink3);font-size:13.5px}
+footer .in{display:flex;gap:20px;flex-wrap:wrap;align-items:center}
+footer a{color:var(--ink2)}
+footer .sp{flex:1}
+@media (max-width:620px){.hero h1{font-size:33px}.hero{padding:52px 0 28px}.nav .links a.opt{display:none}.kpi{gap:22px}.kpi b{font-size:25px}}
+</style>
+</head>
+<body>
+
+<header class="nav"><div class="in">
+<a class="mark" href="#top"><span class="sq">N</span>Nudge</a><span class="tag">v0 preview</span>
+<nav class="links">
+<a class="opt" href="#proof">The result</a><a class="opt" href="#start">Start</a><a class="opt" href="#how">How</a><a href="#faq">FAQ</a>
+</nav>
+</div></header>
+
+<main id="top" class="wrap">
+
+<div class="hero">
+<h1>Your System One model makes a call. You say how it went. It picks better.</h1>
+<p class="lede">Nudge is a small Python library that sits on top of a System One model like <a href="https://docs.typesafe.ai">Jev</a> or <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>. Tell Nudge how a decision turned out — ticket resolved, sale closed, money saved — and it shifts future picks toward what worked. No fine-tuning. No training run. No GPUs. One file on disk.</p>
+<div class="install"><span><span class="p">$ </span>uv sync &amp;&amp; uv run python examples/support.py --store support.db</span><button id="cp">Copy</button></div>
+<div class="facts">
+<span><b>Day one,</b> it leans on your System One model and explores.</span>
+<span><b>Every pick is logged</b> with the odds your model gave and the odds Nudge used.</span>
+<span><b>Everything it learns</b> is a sentence you can read.</span>
+</div>
+</div>
+
+<section class="s" id="proof">
+<h2>It made a production model router 14.8% better</h2>
+<p>A router's job is picking which AI model should answer each prompt — cheap one, expensive one, somewhere in between. We took one built on <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>, an open-weights System One model, pointed it at 5,000 real prompts, and put Nudge on top. Score = how good the answer was, minus what it cost.</p>
+<div class="kpi">
+<div class="win"><b>0.667</b><span><a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a> with Nudge</span></div>
+<div><b>0.581</b><span><a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a> alone</span></div>
+<div class="win"><b>+14.8%</b><span>better, after paying for it</span></div>
+</div>
+<figure>
+<picture>
+<source media="(max-width:620px)" type="image/svg+xml" srcset="assets/routerbench/comparison-mobile.svg">
+<source media="(max-width:620px)" srcset="assets/routerbench/comparison-mobile.png">
+<source type="image/svg+xml" srcset="assets/routerbench/comparison.svg">
+<img src="assets/routerbench/comparison.png" width="900" height="550" decoding="async" alt="Line chart of average cost-adjusted answer quality against prompts processed. Nudge plus Rune starts below Rune alone, crosses above it near prompt 300, and settles near 0.667 against Rune's 0.581 by prompt 5,000.">
+</picture>
+<figcaption>Running average, higher is better. Note the start: Nudge is <em>worse</em> than the router alone for the first 295 prompts. That's the cost of trying things, and it's baked into the average above rather than hidden. Raw numbers: <a href="assets/routerbench/scores.csv">scores.csv</a>, <a href="assets/routerbench/summary.json">summary.json</a>.</figcaption>
+</figure>
+</section>
+
+<section class="s" id="start">
+<h2>Three calls</h2>
+<p><code>ask()</code> when you need a decision. <code>feedback()</code> whenever you find out how it went — an hour later, a week later, doesn't matter. <code>learn()</code> whenever you feel like it. Nothing changes until you call <code>learn()</code>.</p>
+<p>Here it is wired to a real System One model: <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>, served on your own GPU with <code>surogate serve</code> (the model card has the command). <a href="https://docs.typesafe.ai">Jev</a> speaks the same protocol; to use it instead, point <code>URL</code> at <code>https://api.typesafe.ai/v1/systemone</code>, send an <code>Authorization: Bearer</code> header, and set <code>MODEL</code> to <code>jev-latest</code>.</p>
+<pre><span class="k">import</span> json, urllib.request
+<span class="k">from</span> nudge <span class="k">import</span> Answer, Choice, Nudge, Question
+
+URL = <span class="s">&quot;http://localhost:8000/v1/decisions&quot;</span>   <span class="c"># surogate serve ./rune-v3 --port 8000</span>
+MODEL = <span class="s">&quot;rune&quot;</span>                               <span class="c"># the id that GET /v1/models lists</span>
+
+<span class="c"># What is being decided, and what you promise to report back.</span>
+choice = Choice(
+    name=<span class="s">&quot;support&quot;</span>,
+    situation=<span class="s">&quot;A support ticket and the conversation so far&quot;</span>,
+    actions={<span class="s">&quot;answer&quot;</span>: <span class="s">&quot;Reply now&quot;</span>, <span class="s">&quot;escalate&quot;</span>: <span class="s">&quot;Hand to a person&quot;</span>},
+    feedback={<span class="s">&quot;resolved&quot;</span>: <span class="s">&quot;1 if resolved, otherwise 0&quot;</span>},
+)
+
+<span class="k">def</span> decide(state, questions):
+    body = {<span class="s">&quot;model&quot;</span>: MODEL, <span class="s">&quot;state&quot;</span>: state, <span class="s">&quot;questions&quot;</span>: questions}
+    request = urllib.request.Request(URL, json.dumps(body).encode(),
+                                     {<span class="s">&quot;Content-Type&quot;</span>: <span class="s">&quot;application/json&quot;</span>})
+    <span class="k">with</span> urllib.request.urlopen(request, timeout=<span class="o">30</span>) <span class="k">as</span> response:
+        <span class="k">return</span> json.loads(response.read())[<span class="s">&quot;answers&quot;</span>]
+
+<span class="k">def</span> head(q):   <span class="c"># a Nudge question as a typed System One question</span>
+    <span class="k">if</span> q.kind == <span class="s">&quot;binary&quot;</span>:
+        <span class="k">return</span> {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;noul&quot;</span>, <span class="s">&quot;instructions&quot;</span>: q.prompt}
+    <span class="k">if</span> q.kind == <span class="s">&quot;ordinal&quot;</span>:
+        <span class="k">return</span> {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;score&quot;</span>, <span class="s">&quot;instructions&quot;</span>: q.prompt,
+                <span class="s">&quot;criteria&quot;</span>: list(q.levels)}
+    <span class="k">return</span> {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;choice&quot;</span>, <span class="s">&quot;instructions&quot;</span>: q.prompt,
+            <span class="s">&quot;criteria&quot;</span>: {str(i): c <span class="k">for</span> i, c <span class="k">in</span> enumerate(q.categories)}}
+
+<span class="k">def</span> value(q, answer):   <span class="c"># ...and its typed answer as the number Nudge wants</span>
+    <span class="k">if</span> q.kind == <span class="s">&quot;binary&quot;</span>:
+        <span class="k">return</span> answer[<span class="s">&quot;noul&quot;</span>]
+    <span class="k">if</span> q.kind == <span class="s">&quot;ordinal&quot;</span>:
+        <span class="k">return</span> answer[<span class="s">&quot;score&quot;</span>] + <span class="o">1</span>   <span class="c"># scores are 0-based; Nudge levels run 1..5</span>
+    p = {c: answer[<span class="s">&quot;probabilities&quot;</span>][str(i)] <span class="k">for</span> i, c <span class="k">in</span> enumerate(q.categories)}
+    total = sum(p.values())
+    <span class="k">return</span> {c: v / total <span class="k">for</span> c, v <span class="k">in</span> p.items()}
+
+<span class="k">class</span> Rune:
+    identity = MODEL + <span class="s">&quot;:support-v1&quot;</span>   <span class="c"># bump when the model or the prompts change</span>
+
+    <span class="k">def</span> ask(self, state, questions):
+        <span class="c"># The odds get their own request, so the questions Nudge asks</span>
+        <span class="c"># later can never quietly move your baseline.</span>
+        odds = decide(state, {<span class="s">&quot;action&quot;</span>: {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;choice&quot;</span>,
+            <span class="s">&quot;instructions&quot;</span>: choice.situation,
+            <span class="s">&quot;criteria&quot;</span>: dict(choice.actions)}})[<span class="s">&quot;action&quot;</span>][<span class="s">&quot;probabilities&quot;</span>]
+        total = sum(odds.values())
+        heads = {q.name: head(q) <span class="k">for</span> q <span class="k">in</span> questions}
+        answers = decide(state, heads) <span class="k">if</span> heads <span class="k">else</span> {}
+        <span class="k">return</span> Answer(
+            probabilities={a: p / total <span class="k">for</span> a, p <span class="k">in</span> odds.items()},
+            features={q.name: value(q, answers[q.name]) <span class="k">for</span> q <span class="k">in</span> questions},
+        )
+
+asked = [Question(<span class="s">&quot;repeat_issue&quot;</span>, <span class="s">&quot;Has this customer complained before?&quot;</span>)]
+
+<span class="k">with</span> Nudge(choice, store=<span class="s">&quot;support.db&quot;</span>, model=Rune(), questions=asked) <span class="k">as</span> policy:
+    d = policy.ask(state=<span class="s">&quot;My order arrived damaged, second time this month&quot;</span>)
+    policy.feedback(d.id, resolved=<span class="o">1</span>)   <span class="c"># whenever you find out</span>
+    policy.learn()                      <span class="c"># whenever you want</span></pre>
+<p>That's the whole integration. No SDK, no wrapper framework — if your thing has an <code>ask()</code> that returns odds, Nudge will use it. The question at the bottom is one you wrote. To let Nudge write its own, pass a <code>proposer=</code> backed by a chat model (see <code>docs/adapters.md</code>); without one it learns from the baseline odds and your questions only.</p>
+<p class="mut">Python 3.11+, NumPy, that's it. Nothing to deploy — Nudge runs inside your process and keeps what it learns in a SQLite file you own. Not on PyPI yet, so install the checkout with <code>uv sync</code> or <code>pip install .</code>. The package is <code>nudge-policy</code>; you still <code>import nudge</code>.</p>
+</section>
+
+<section class="s" id="how">
+<h2>What's actually going on</h2>
+<ol class="steps">
+<li>Your System One model already has an opinion — some odds across the options. Nudge records them and uses them as one input among several.</li>
+<li>You report outcomes. Nudge keeps a small scorecard: for each option, is your System One model usually too confident here, or not confident enough?</li>
+<li>To tell one situation from another, it asks your System One model short questions about the same text it already read — <em>"Has this customer complained before?"</em> — and uses the answers as columns in that scorecard.</li>
+<li>It writes those questions itself, tests each one against outcomes it held back, and throws away the ones that don't predict anything. Six good questions is a normal end state, not six hundred.</li>
+<li>Then it picks. It draws 64 plausible scorecards from what it has seen, lets each one vote for the best option, and mixes in a 5% uniform share so every option keeps getting tried. There is no cap on how far it can move from your model's odds; if an option keeps paying off, it wins.</li>
+</ol>
+<p>Because the question answers are learned from a few columns and not a giant pile of numbers, it starts being useful after <em>hundreds</em> of outcomes rather than tens of thousands. And because the original text is kept, a question invented in week six can be scored against a decision from week one.</p>
+<p class="mut">Recent outcomes count more than old ones — a decision's weight halves every seven days by default — so when what works changes, it follows.</p>
+</section>
+
+<section class="s" id="reward">
+<h2>Careful what you ask for</h2>
+<p>You tell Nudge what to count. It will take you literally.</p>
+<pre>feedback={
+    <span class="s">"resolved"</span>: <span class="s">"1 if the ticket got resolved, else 0"</span>,
+    <span class="s">"refunded"</span>: <span class="s">"1 if we issued a refund, else 0"</span>,
+},
+reward={<span class="s">"resolved"</span>: <span class="o">1.0</span>, <span class="s">"refunded"</span>: <span class="o">-0.5</span>},</pre>
+<div class="note warn"><span class="ic">!</span><div>Report only <code>resolved</code>, and Nudge learns to refund everybody. That's not it misbehaving — refunding really is the cheapest way to make the number you asked for go up. Report the cost too, with a minus sign. At <code>-0.5</code>, a refund has to lift the odds of resolution by fifty points before it's worth doing.</div></div>
+<p>Pick the number you'd defend to your CFO. Change your mind later and it refits from outcomes you already logged — nothing to re-collect.</p>
+</section>
+
+<section class="s" id="see">
+<h2>You can always ask why</h2>
+<p>Every decision comes back with a plain-English reason, and the questions it's using are just sentences:</p>
+<pre><span class="o">&gt;&gt;&gt;</span> d.why
+<span class="s">'escalate: probability 0.190 &rarr; 0.271 (+0.081); predicted utility +0.312;</span>
+<span class="s"> largest mean term question:repeat_issue +0.204. Posterior exploration.'</span>
+
+<span class="o">&gt;&gt;&gt;</span> policy.report()
+<span class="c"># every option: what you observed, how far it moved from your model's odds,</span>
+<span class="c"># how sure it is, and how much feedback never came back at all</span></pre>
+<p>Nothing is a black box vector. A weight reads as a sentence: <em>when the answer to this question flips to yes, this option turns out this much better</em>. Your domain expert can read them — or write one.</p>
+</section>
+
+<section class="s" id="limits">
+<h2>Straight answers</h2>
+<ul class="plain">
+<li><b>It doesn't train your model.</b> Nothing is fine-tuned. Your System One model is untouched; Nudge just reads its output.</li>
+<li><b>It is not a safety rail.</b> There is no drift cap. Every option keeps at least a small share of picks, even one your model rates at zero, and an option that keeps winning will take over. The first weeks cost you something, and <code>report()</code> shows exactly how far it has moved.</li>
+<li><b>It needs per-decision outcomes.</b> If the result belongs to a whole session instead of one decision, this is the wrong tool — that's reinforcement learning, and Nudge doesn't do it.</li>
+<li><b>It costs you something early.</b> See the first 295 prompts in that chart. Learning isn't free.</li>
+<li><b>It won't promise it beat your baseline.</b> There's no statistical certification in v0, and the numbers it shows you are observations, not proof of cause.</li>
+<li><b>It's a preview.</b> Research software, MIT licensed, actively being measured. Don't put it in front of customers yet.</li>
+</ul>
+</section>
+
+<section class="s faq" id="faq">
+<h2>FAQ</h2>
+<details><summary>Do I need GPUs, a training pipeline, any of that?</summary><p>No. Nudge is a library that runs in your process with NumPy and a SQLite file. The only model calls are the ones to your own System One model.</p></details>
+<details><summary>What happens on day one with no data?</summary><p>It explores. With no outcomes yet, the 64 draws come from the prior, so picks are spread across the options with your model's odds as one input. The chart above shows the price: worse than the router alone for the first 295 prompts.</p></details>
+<details><summary>How far can it drift?</summary><p>As far as the outcomes justify. There is no cap and no veto for options your model rated at zero. The only guard is the exploration floor, 5% by default and a dial: that share of probability is spread evenly over every option, so nothing is ever ruled out for good.</p></details>
+<details><summary>What if feedback shows up late, or never?</summary><p>Late is fine — report it whenever, and the newest report wins. Never is also fine: a missing outcome is treated as missing, never as a zero.</p></details>
+<details><summary>Can I write my own questions?</summary><p>Yes. A question is a line of text. Yours gets tested against held-out outcomes just like the ones Nudge invents.</p></details>
+<details><summary>Can I swap the underlying model?</summary><p>Yes — <a href="https://docs.typesafe.ai">Jev</a> to <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>, or either to your own — but it starts a new version — the question answers mean something different once a different model is answering them.</p></details>
+<details><summary>Okay, what is this really?</summary><p>A contextual bandit with an interpretable policy layer: per-action Bayesian linear reward models over the System One model's odds and its answers to learned questions, served by posterior-sample voting with a uniform exploration floor. The maths is in <code>docs/design.md</code> if that's your thing.</p></details>
+</section>
+
+</main>
+
+<footer><div class="wrap in">
+<span>Nudge &middot; by <a href="https://dossierlabs.ai/">Dossier Labs</a></span>
+<span class="sp"></span>
+<span>MIT</span><span>v0 preview</span>
+</div></footer>
+
+<script>
+document.getElementById('cp').onclick = function () {
+  var t = 'uv sync && uv run python examples/support.py --store support.db';
+  if (navigator.clipboard) { navigator.clipboard.writeText(t); this.textContent = 'Copied'; }
+};
+</script>
+
+</body>
+</html>
