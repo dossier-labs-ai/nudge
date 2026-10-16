@@ -117,14 +117,15 @@ footer .sp{flex:1}
 <section class="s" id="start">
 <h2>Three calls</h2>
 <p><code>ask()</code> when you need a decision. <code>feedback()</code> whenever you find out how it went — an hour later, a week later, doesn't matter. <code>learn()</code> whenever you feel like it. Nothing changes until you call <code>learn()</code>.</p>
-<p>Here it is wired to a real System One model: <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>, served on your own GPU with <code>surogate serve</code> (the model card has the command). <a href="https://docs.typesafe.ai">Jev</a> speaks the same protocol; to use it instead, point <code>URL</code> at <code>https://api.typesafe.ai/v1/systemone</code>, send an <code>Authorization: Bearer</code> header, and set <code>MODEL</code> to <code>jev-latest</code>.</p>
+<p>Here it is wired to <a href="https://docs.typesafe.ai">Jev</a> through TypeSafe's API. The request and response codecs ship with Nudge, so the adapter is one HTTP call.</p>
 <pre><span class="k">import</span> json, urllib.request
-<span class="k">from</span> nudge <span class="k">import</span> Answer, Choice, Nudge, Question
+<span class="k">from</span> nudge <span class="k">import</span> Choice, Nudge, Question
+<span class="k">from</span> nudge.adapters <span class="k">import</span> typesafe_answer, typesafe_identity, typesafe_request
 
-URL = <span class="s">&quot;http://localhost:8000/v1/decisions&quot;</span>   <span class="c"># surogate serve ./rune-v3 --port 8000</span>
-MODEL = <span class="s">&quot;rune&quot;</span>                               <span class="c"># the id that GET /v1/models lists</span>
+URL = <span class="s">&quot;https://api.typesafe.ai/v1/systemone&quot;</span>
+MODEL = <span class="s">&quot;jev-1.13.0&quot;</span>   <span class="c"># pinned: a new Jev version answers differently, so it starts a new version of what Nudge learned</span>
+KEY = open(<span class="s">&quot;typesafe.key&quot;</span>).read().strip()
 
-<span class="c"># What is being decided, and what you promise to report back.</span>
 choice = Choice(
     name=<span class="s">&quot;support&quot;</span>,
     situation=<span class="s">&quot;A support ticket and the conversation so far&quot;</span>,
@@ -132,55 +133,23 @@ choice = Choice(
     feedback={<span class="s">&quot;resolved&quot;</span>: <span class="s">&quot;1 if resolved, otherwise 0&quot;</span>},
 )
 
-<span class="k">def</span> decide(state, questions):
-    body = {<span class="s">&quot;model&quot;</span>: MODEL, <span class="s">&quot;state&quot;</span>: state, <span class="s">&quot;questions&quot;</span>: questions}
-    request = urllib.request.Request(URL, json.dumps(body).encode(),
-                                     {<span class="s">&quot;Content-Type&quot;</span>: <span class="s">&quot;application/json&quot;</span>})
-    <span class="k">with</span> urllib.request.urlopen(request, timeout=<span class="o">30</span>) <span class="k">as</span> response:
-        <span class="k">return</span> json.loads(response.read())[<span class="s">&quot;answers&quot;</span>]
-
-<span class="k">def</span> head(q):   <span class="c"># a Nudge question as a typed System One question</span>
-    <span class="k">if</span> q.kind == <span class="s">&quot;binary&quot;</span>:
-        <span class="k">return</span> {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;noul&quot;</span>, <span class="s">&quot;instructions&quot;</span>: q.prompt}
-    <span class="k">if</span> q.kind == <span class="s">&quot;ordinal&quot;</span>:
-        <span class="k">return</span> {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;score&quot;</span>, <span class="s">&quot;instructions&quot;</span>: q.prompt,
-                <span class="s">&quot;criteria&quot;</span>: list(q.levels)}
-    <span class="k">return</span> {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;choice&quot;</span>, <span class="s">&quot;instructions&quot;</span>: q.prompt,
-            <span class="s">&quot;criteria&quot;</span>: {str(i): c <span class="k">for</span> i, c <span class="k">in</span> enumerate(q.categories)}}
-
-<span class="k">def</span> value(q, answer):   <span class="c"># ...and its typed answer as the number Nudge wants</span>
-    <span class="k">if</span> q.kind == <span class="s">&quot;binary&quot;</span>:
-        <span class="k">return</span> answer[<span class="s">&quot;noul&quot;</span>]
-    <span class="k">if</span> q.kind == <span class="s">&quot;ordinal&quot;</span>:
-        <span class="k">return</span> answer[<span class="s">&quot;score&quot;</span>] + <span class="o">1</span>   <span class="c"># scores are 0-based; Nudge levels run 1..5</span>
-    p = {c: answer[<span class="s">&quot;probabilities&quot;</span>][str(i)] <span class="k">for</span> i, c <span class="k">in</span> enumerate(q.categories)}
-    total = sum(p.values())
-    <span class="k">return</span> {c: v / total <span class="k">for</span> c, v <span class="k">in</span> p.items()}
-
-<span class="k">class</span> Rune:
-    identity = MODEL + <span class="s">&quot;:support-v1&quot;</span>   <span class="c"># bump when the model or the prompts change</span>
+<span class="k">class</span> Jev:
+    identity = typesafe_identity(choice, MODEL)
 
     <span class="k">def</span> ask(self, state, questions):
-        <span class="c"># The odds get their own request, so the questions Nudge asks</span>
-        <span class="c"># later can never quietly move your baseline.</span>
-        odds = decide(state, {<span class="s">&quot;action&quot;</span>: {<span class="s">&quot;type&quot;</span>: <span class="s">&quot;choice&quot;</span>,
-            <span class="s">&quot;instructions&quot;</span>: choice.situation,
-            <span class="s">&quot;criteria&quot;</span>: dict(choice.actions)}})[<span class="s">&quot;action&quot;</span>][<span class="s">&quot;probabilities&quot;</span>]
-        total = sum(odds.values())
-        heads = {q.name: head(q) <span class="k">for</span> q <span class="k">in</span> questions}
-        answers = decide(state, heads) <span class="k">if</span> heads <span class="k">else</span> {}
-        <span class="k">return</span> Answer(
-            probabilities={a: p / total <span class="k">for</span> a, p <span class="k">in</span> odds.items()},
-            features={q.name: value(q, answers[q.name]) <span class="k">for</span> q <span class="k">in</span> questions},
-        )
+        body = typesafe_request(choice, state, questions, MODEL)
+        request = urllib.request.Request(URL, json.dumps(body).encode(),
+            {<span class="s">&quot;Content-Type&quot;</span>: <span class="s">&quot;application/json&quot;</span>, <span class="s">&quot;Authorization&quot;</span>: <span class="s">&quot;Bearer &quot;</span> + KEY})
+        <span class="k">with</span> urllib.request.urlopen(request, timeout=<span class="o">30</span>) <span class="k">as</span> response:
+            <span class="k">return</span> typesafe_answer(json.load(response), choice, questions, MODEL)
 
 asked = [Question(<span class="s">&quot;repeat_issue&quot;</span>, <span class="s">&quot;Has this customer complained before?&quot;</span>)]
 
-<span class="k">with</span> Nudge(choice, store=<span class="s">&quot;support.db&quot;</span>, model=Rune(), questions=asked) <span class="k">as</span> policy:
+<span class="k">with</span> Nudge(choice, store=<span class="s">&quot;support.db&quot;</span>, model=Jev(), questions=asked) <span class="k">as</span> policy:
     d = policy.ask(state=<span class="s">&quot;My order arrived damaged, second time this month&quot;</span>)
     policy.feedback(d.id, resolved=<span class="o">1</span>)   <span class="c"># whenever you find out</span>
     policy.learn()                      <span class="c"># whenever you want</span></pre>
-<p>That's the whole integration. No SDK, no wrapper framework — if your thing has an <code>ask()</code> that returns odds, Nudge will use it. The question at the bottom is one you wrote. To let Nudge write its own, pass a <code>proposer=</code> backed by a chat model (see <code>docs/adapters.md</code>); without one it learns from the baseline odds and your questions only.</p>
+<p>That's the whole integration. The question at the bottom is one you wrote. To let Nudge write its own, pass a <code>proposer=</code> backed by a chat model (see <code>docs/adapters.md</code>); without one it learns from the baseline odds and your questions only. Any model with an <code>ask()</code> that returns odds works the same way; <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>, served on your own GPU with <code>surogate serve</code>, speaks the same protocol.</p>
 <p class="mut">Python 3.11+, NumPy, that's it. Nothing to deploy — Nudge runs inside your process and keeps what it learns in a SQLite file you own. Install with <code>pip install nudge-policy</code> from <a href="https://pypi.org/project/nudge-policy/">PyPI</a>; you still <code>import nudge</code>. Source is on <a href="https://github.com/dossier-labs-ai/nudge">GitHub</a>. For an offline demo with no model at all, clone the repo and run <code>uv run python examples/support.py --store support.db</code>.</p>
 </section>
 
