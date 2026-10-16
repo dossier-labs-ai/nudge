@@ -27,6 +27,16 @@ pre .c{color:var(--ink3)}pre .k{color:#7a5b28}pre .s{color:#2b593f}pre .o{color:
 .tag{font-size:12px;padding:1px 8px;border-radius:4px;background:rgba(135,131,120,.18);color:var(--ink2);font-weight:500}
 .nav .links{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
 .nav .links a{border:0;color:var(--ink2);font-size:14px;padding:4px 8px;border-radius:5px}
+.nav .gh{display:inline-flex;align-items:center;gap:7px;margin-left:8px;padding:5px 10px;border:1px solid var(--line2);border-radius:6px;color:var(--ink);font-size:14px;font-weight:500;white-space:nowrap}
+.nav .gh:hover{background:var(--hov)}
+.nav .gh svg{width:16px;height:16px;fill:currentColor;flex:none}
+.nav .gh .stars{color:var(--ink2);font-variant-numeric:tabular-nums;padding-left:7px;border-left:1px solid var(--line2)}
+.nav .gh .stars:empty{display:none}
+.hero .cta{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:28px}
+.hero .cta .install{margin-top:0}
+.hero .cta .repo{display:inline-flex;align-items:center;gap:7px;font-size:15px;color:var(--ink2);border:0}
+.hero .cta .repo svg{width:16px;height:16px;fill:currentColor}
+.hero .cta .repo:hover{color:var(--ink);background:none}
 .wrap{max-width:760px;margin:0 auto;padding:0 24px}
 .hero{padding:84px 0 36px}
 .hero h1{font-size:44px;line-height:1.1;font-weight:700;letter-spacing:-.024em;text-wrap:balance}
@@ -78,7 +88,8 @@ footer .sp{flex:1}
 <header class="nav"><div class="in">
 <a class="mark" href="#top"><span class="sq">N</span>Nudge</a><span class="tag">v0 preview</span>
 <nav class="links">
-<a class="opt" href="#proof">The result</a><a class="opt" href="#start">Start</a><a class="opt" href="#how">How</a><a href="#faq">FAQ</a><a href="https://github.com/dossier-labs-ai/nudge">GitHub</a>
+<a class="opt" href="#proof">The result</a><a class="opt" href="#start">Start</a><a class="opt" href="#how">How</a><a href="#faq">FAQ</a>
+<a class="gh" href="https://github.com/dossier-labs-ai/nudge" aria-label="Nudge on GitHub"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub<span class="stars" id="gh-stars"></span></a>
 </nav>
 </div></header>
 
@@ -87,7 +98,10 @@ footer .sp{flex:1}
 <div class="hero">
 <h1>Your System One model makes a call. You say how it went. It picks better.</h1>
 <p class="lede">Nudge is a small Python library that sits on top of a System One model like <a href="https://docs.typesafe.ai">Jev</a> or <a href="https://huggingface.co/surogate/rune-26b-a4b-GGUF">Rune</a>. Tell Nudge how a decision turned out — ticket resolved, sale closed, money saved — and it shifts future picks toward what worked. No fine-tuning. No training run. No GPUs. One file on disk.</p>
+<div class="cta">
 <div class="install"><span><span class="p">$ </span>pip install nudge-policy</span><button id="cp">Copy</button></div>
+<a class="repo" href="https://github.com/dossier-labs-ai/nudge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>View on GitHub</a>
+</div>
 <div class="facts">
 <span><b>Day one,</b> it leans on your System One model and explores.</span>
 <span><b>Every pick is logged</b> with the odds your model gave and the odds Nudge used.</span>
@@ -227,6 +241,14 @@ document.getElementById('cp').onclick = function () {
   var t = 'pip install nudge-policy';
   if (navigator.clipboard) { navigator.clipboard.writeText(t); this.textContent = 'Copied'; }
 };
+fetch('https://api.github.com/repos/dossier-labs-ai/nudge', {headers: {Accept: 'application/vnd.github+json'}})
+  .then(function (r) { return r.ok ? r.json() : null; })
+  .then(function (repo) {
+    if (!repo || typeof repo.stargazers_count !== 'number' || repo.stargazers_count < 1) return;
+    var n = repo.stargazers_count;
+    document.getElementById('gh-stars').textContent = n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k' : String(n);
+  })
+  .catch(function () {});
 </script>
 
 </body>
